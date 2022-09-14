@@ -46,7 +46,8 @@ const folderValidationSchema = Yup.object().shape({
 });
 
 export default function Home() {
-
+    const [loading, setLoading] = useState(false)
+    const [newFolderId, setNewFolderId] = useState('')
     const history = useHistory()
     const {
         loading: folderLoading, 
@@ -58,7 +59,9 @@ export default function Home() {
     const {loading: loadingCurrent, current: userCurrent} = useSelector(state => state.user)
     const {loading: submitting, fileSubmit} = useFileCreate()
     const {loading: downloading, download} = useDownloadFile()
-    useFetchFolder()
+//    useFetchFolder(newFolderId,setNewFolderId)
+   useFetchFolder()
+    // console.log({data})
     const {
         preview
     } = useFilePreview()
@@ -66,7 +69,7 @@ export default function Home() {
     const formik = useFormik({
         initialValues: {
             name: '',
-            type: 1
+            type: ''
         },
         validationSchema: folderValidationSchema,
         onSubmit: async (values) => {
@@ -101,7 +104,14 @@ export default function Home() {
         setIsModalCreateFolderVisible(true);
     };
     
+    // const handleOkCreateFolder = () => {
+    //     setLoading(true)
+    //     handleSubmit
+    //     setLoading(false)
+    // }
+
     const handleCancelCreateFolder = () => {
+        formik.resetForm()
         setIsModalCreateFolderVisible(false);
     };
 
@@ -129,6 +139,8 @@ export default function Home() {
 
     const redirectToFolder = (id) => {
         history.push(`/v2?folder=${id}`)
+        // setNewFolderId(id)
+        // console.log(id)
         history.go(0)
     }
 
@@ -161,6 +173,7 @@ export default function Home() {
             title: 'Name',
             dataIndex: 'name',
             render(text, record) {
+                // console.log(record)
                 return (
                     <div>
                         {record.isFolder  ? 
@@ -238,29 +251,34 @@ export default function Home() {
             <div className="content">
                 <div className="actions d-flex justify-content-end">
                     <div className="action-button">
-                        <Button 
-                            icon={<FolderAddOutlined style={{ fontSize: '18px' }} />} 
-                            onClick={showModalCreateFolder} 
-                            loading={folderLoading} 
-                        >
-                            Create folder
-                        </Button>
+                        <Tooltip title="Create folder">
+                            <Button 
+                                icon={<FolderAddOutlined style={{ fontSize: '18px' }} />} 
+                                onClick={showModalCreateFolder} 
+                                loading={folderLoading} 
+                            >
+                                Create folder
+                            </Button>
+                        </Tooltip>
                         <Modal 
                             title="Create folder" 
                             visible={isModalCreateFolderVisible} 
                             onOk={handleSubmit} 
                             onCancel={handleCancelCreateFolder}
+                            // confirmLoading={submitting}
+                            focusTriggerAfterClose={true}
+                            maskClosable={false}
                         >
                             <div>
                                 <label className="form-label">Folder name</label>
                                 <div className="input-group mb-3">
-                                    <Input placeholder="Folder name" onChange={handleChange('name')} />
+                                    <Input placeholder="Folder name" value={values.name || ''} onChange={handleChange('name')} />
                                 </div>
                                 {errors.name && <span className="error-text">{errors.name}</span>}
                             </div>
                             {currentFolderId === userCurrent.account && <div>
                                 <label className="form-label">Folder type</label>
-                                <Select style={{ width: '100%' }} onChange={(val) => setFieldValue('type', parseInt(val))}>
+                                <Select style={{ width: '100%' }} placeholder='Folder type' value={values.type || []} onChange={(val) => setFieldValue('type', val)}>
                                     <Option value="1">Private</Option>
                                     <Option value="2">Shareable</Option>
                                 </Select>
@@ -269,17 +287,20 @@ export default function Home() {
                         </Modal>
                     </div>
                     {currentFolderId !== userCurrent.account && <div className="action-button">
-                        <Button 
-                            icon={<UploadOutlined style={{ fontSize: '18px' }} />} 
-                            onClick={showModalUpload}
-                        >
-                            Upload file
-                        </Button>
+                        <Tooltip title='Upload file'>
+                            <Button 
+                                icon={<UploadOutlined style={{ fontSize: '18px' }} />} 
+                                onClick={showModalUpload}
+                            >
+                                Upload file
+                            </Button>
+                        </Tooltip>
                         <Modal 
                             title="Upload file" 
                             visible={isModalUploadVisible} 
                             onCancel={handleCancelUpload}
                             footer={[]}
+                            maskClosable={false}
                         >
                             <Dragger {...props}>
                                 <p className="ant-upload-drag-icon">

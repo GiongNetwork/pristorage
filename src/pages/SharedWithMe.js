@@ -94,6 +94,7 @@ export default function SharedWithMe() {
     
     const handleCancelCreateFolder = () => {
         setIsModalCreateFolderVisible(false);
+        formik.resetForm()
     };
 
     const showModalUpload = () => {
@@ -206,36 +207,42 @@ export default function SharedWithMe() {
             <div className="content">
                 {permission === 2 && <div className="actions d-flex justify-content-end">
                     <div className="action-button">
-                        <Button 
-                            icon={<FolderAddOutlined style={{ fontSize: '18px' }} />} 
-                            onClick={showModalCreateFolder} 
-                        >
-                            Create folder
-                        </Button>
+                        <Tooltip title='Create folder'>
+                            <Button 
+                                icon={<FolderAddOutlined style={{ fontSize: '18px' }} />} 
+                                onClick={showModalCreateFolder} 
+                            >
+                                Create folder
+                            </Button>
+                        </Tooltip>
                         <Modal 
                             title="Create folder" 
                             visible={isModalCreateFolderVisible} 
                             onOk={handleSubmit} 
                             onCancel={handleCancelCreateFolder}
+                            maskClosable={false}
                         >
                             <label className="form-label">Folder name</label>
                             <div className="input-group mb-3">
-                                <Input placeholder="Folder name" onChange={handleChange('name')} />
+                                <Input placeholder="Folder name" value={values.name || ''} onChange={handleChange('name')} />
                             </div>
                             {errors.name && <span className="error-text">{errors.name}</span>}
                         </Modal>
                     </div>
                     <div className="action-button">
-                        <Button 
-                            icon={<UploadOutlined style={{ fontSize: '18px' }} />} 
-                            onClick={showModalUpload}
-                        >
-                            Upload file
-                        </Button>
+                        <Tooltip title='Upload file'>
+                            <Button 
+                                icon={<UploadOutlined style={{ fontSize: '18px' }} />} 
+                                onClick={showModalUpload}
+                            >
+                                Upload file
+                            </Button>
+                        </Tooltip>
                         <Modal 
                             title="Upload file" 
                             visible={isModalUploadVisible} 
                             onCancel={handleCancelUpload}
+                            maskClosable={false}
                             footer={[]}
                         >
                             <Dragger {...props}>

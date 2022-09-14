@@ -4,7 +4,8 @@ import {
     Modal, 
     Input,
     Select,
-    message
+    message,
+    Tooltip
 } from 'antd'
 import {
     ShareAltOutlined,
@@ -83,28 +84,32 @@ const ShareFolderButton = (props) => {
     
     const handleCancelShare = () => {
         setIsModalShareVisible(false);
+        accountFormik.resetForm()
     };
 
     return (
         <>
-        <Button onClick={showModalShare}>
-            <ShareAltOutlined />
-        </Button>
+        <Tooltip title='Share file'>
+            <Button onClick={showModalShare}>
+                <ShareAltOutlined />
+            </Button>
+        </Tooltip>
         <Modal 
             title="Share folder" 
             visible={isModalShareVisible} 
             onOk={handleSubmit} 
             onCancel={handleCancelShare}
+            maskClosable={false}
         >
             <label className="form-label">Share with</label>
             <div className="input-group mb-3">
-                <Input placeholder="Account id" onChange={handleChange('account')} />
+                <Input placeholder="Account id" value={values.account || ''} onChange={handleChange('account')} />
             </div>
             {errors.account && <span className="error-text">{errors.account}</span>}
 
             <div className="input-group mb-3">
                 <label className="form-label">Permission</label>
-                <Select style={{ width: '100%' }} onChange={(val) => setFieldValue('permissions', parseInt(val))}>
+                <Select style={{ width: '100%' }} placeholder='Permission' value={values.permissions || []} onChange={(val) => setFieldValue('permissions', val)}>
                     <Option value="1">Read only</Option>
                     <Option value="2">Edit</Option>
                 </Select>
