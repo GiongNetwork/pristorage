@@ -30,7 +30,7 @@ const {Option} = Select
 const ShareFileButton = (props) => {
 
     const dispatch = useDispatch()
-
+    const [loading, setLoading] = useState(false)
     const {loading: loadingCurrent, current: userCurrent} = useSelector(state => state.user)
 
     const accountFormik = useFormik({
@@ -40,6 +40,7 @@ const ShareFileButton = (props) => {
         },
         validationSchema: validationSchema,
         onSubmit: async (values) => {
+            setLoading(true)
             const user = await window.contract.get_user({account_id: values.account})
             if (!user) {
                 message.error(`User "${values.account}" not found`)
@@ -66,13 +67,17 @@ const ShareFileButton = (props) => {
                 _created_at: current
             }
             const data = await window.contract.share_file_v2(params)
-            history.go(0)
+            setIsModalShareVisible(false)
+            message.success(`Share file success with account ${values.account}!!!`)
+            setLoading(false)
+            // history.go(0)
         }
     })
 
     const {
         values: values, 
-        errors: errors, 
+        errors: errors,
+        touched, 
         handleChange: handleChange, 
         handleSubmit: handleSubmit, 
         setFieldValue: setFieldValue
@@ -92,7 +97,7 @@ const ShareFileButton = (props) => {
     return (
         <>
         <Tooltip title="Share file">
-            <Button onClick={showModalShare}>
+            <Button onClick={showModalShare} className="mx-1">
                 <ShareAltOutlined />
             </Button>
         </Tooltip>
@@ -101,22 +106,23 @@ const ShareFileButton = (props) => {
             visible={isModalShareVisible} 
             onOk={handleSubmit} 
             onCancel={handleCancelShare}
+            confirmLoading={loading}
             maskClosable={false}
         >
             <div className="input-group mb-3">
                 <label className="form-label">Share with</label>
                 <Input placeholder="Account id" value={values.account || ''} onChange={handleChange('account')} />
             </div>
-            {errors.account && <span className="error-text">{errors.account}</span>}
+            {errors.account && touched.account && <span className="error-text">{errors.account}</span>}
             
             <div className="input-group mb-3">
                 <label className="form-label">Permission</label>
-                <Select style={{ width: '100%' }} placeholder="Permission" value={values.permissions || []} onChange={(val) => setFieldValue('permissions', val)}>
+                <Select style={{ width: '100%' }} placeholder="Permission" value={values.permissions.toString() || []} onChange={(val) => setFieldValue('permissions', parseInt(val))}>
                     <Option value="1">Read only</Option>
                     {/* <Option value="2">Edit</Option> */}
                 </Select>
             </div>
-            {errors.permissions && <span className="error-text">{errors.permissions}</span>}
+            {errors.permissions && touched.permissions && <span className="error-text">{errors.permissions}</span>}
         </Modal>
         </>
     )

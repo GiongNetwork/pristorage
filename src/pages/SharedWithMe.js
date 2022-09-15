@@ -41,7 +41,8 @@ const folderValidationSchema = Yup.object().shape({
 });
 
 export default function SharedWithMe() {
-
+    const [loading, setLoading] = useState(false)
+    const [newFolderId, setNewFolderId] = useState('')
     const history = useHistory()
 
     const [data, setData] = useState([])
@@ -56,7 +57,7 @@ export default function SharedWithMe() {
     } = useSelector(state => state.sharedWithMe)
     const {loading: submitting, fileSubmit} = useFileCreate()
     const {loading: downloading, download} = useDownloadFile()
-    useFetchSharedDocs()
+    useFetchSharedDocs(newFolderId, setNewFolderId)
     const {
         preview
     } = useFilePreview()
@@ -67,6 +68,7 @@ export default function SharedWithMe() {
         },
         validationSchema: folderValidationSchema,
         onSubmit: async (values) => {
+            setLoading(true)
             const currentTimeStamp = new Date().getTime()
             const id = uuidv4()
             const {accountId} = await window.walletConnection.account()
@@ -79,11 +81,16 @@ export default function SharedWithMe() {
                 _type: null,
             }
             await window.contract.create_folder_v2(folder)
-            history.go(0)
+            setIsModalCreateFolderVisible(false)
+            message.success("Folder created!!!")
+            setNewFolderId(folder._id)
+            setLoading(false)
+            formik.resetForm()
+            // history.go(0)
         }
     })
 
-    const {values, errors, handleChange, handleSubmit, setFieldValue} = formik
+    const {values, errors, touched, handleChange, handleSubmit, setFieldValue} = formik
 
     const [isModalCreateFolderVisible, setIsModalCreateFolderVisible] = useState(false);
     const [isModalUploadVisible, setIsModalUploadVisible] = useState(false);
@@ -127,10 +134,12 @@ export default function SharedWithMe() {
     const redirectToFolder = (id) => {
         if (!id || id === rootFolder?.parent) {
             history.push(`/shared_with_me`)
-            history.go(0)
+            setNewFolderId('')
+            // history.go(0)
         } else {
             history.push(`/shared_with_me?doc_id=${id}`)
-            history.go(0)
+            setNewFolderId(id)
+            // history.go(0)
         }
     }
 
@@ -182,10 +191,11 @@ export default function SharedWithMe() {
             render(text, record) {
                 return (
                     <div>
-                        {!record.isFolder && !record.isTop && <div className="d-flex justify-content-evenly">
+                        {!record.isFolder && !record.isTop && <div className="d-flex" style={{float:"right"}}>
                             <Tooltip title="Download">
                                 <Button
                                     onClick={async () => downloadFile(record)}
+                                    className='mx-1'
                                 >
                                     <DownloadOutlined />
                                 </Button>
@@ -205,7 +215,7 @@ export default function SharedWithMe() {
                 <hr />
             </div>
             <div className="content">
-                {permission === 2 && <div className="actions d-flex justify-content-end">
+                {permission === 2  && <div className="actions d-flex justify-content-end">
                     <div className="action-button">
                         <Tooltip title='Create folder'>
                             <Button 
@@ -220,13 +230,14 @@ export default function SharedWithMe() {
                             visible={isModalCreateFolderVisible} 
                             onOk={handleSubmit} 
                             onCancel={handleCancelCreateFolder}
+                            confirmLoading={loading}
                             maskClosable={false}
                         >
                             <label className="form-label">Folder name</label>
                             <div className="input-group mb-3">
                                 <Input placeholder="Folder name" value={values.name || ''} onChange={handleChange('name')} />
                             </div>
-                            {errors.name && <span className="error-text">{errors.name}</span>}
+                            {errors.name && touched.name && <span className="error-text">{errors.name}</span>}
                         </Modal>
                     </div>
                     <div className="action-button">
@@ -250,7 +261,7 @@ export default function SharedWithMe() {
                                     <InboxOutlined />
                                 </p>
                                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                            </Dragger>,
+                            </Dragger>
                         </Modal>
                     </div>
                 </div>}

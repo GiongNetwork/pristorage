@@ -17,7 +17,8 @@ import {
     Upload, 
     message, 
     Tooltip,
-    Select 
+    Select,
+    Spin, 
 } from 'antd';
 import { 
     useSelector, 
@@ -36,6 +37,7 @@ import useFetchFolder from '../hook/useFetchFolder'
 import useFileCreate from '../hook/useFileCreate'
 import useDownloadFile from '../hook/useDownloadFile'
 import useFilePreview from '../hook/useFilePreview'
+import { async } from 'regenerator-runtime';
 
 const { Dragger } = Upload;
 const {Option} = Select
@@ -47,6 +49,7 @@ const folderValidationSchema = Yup.object().shape({
 
 export default function Home() {
     const [loading, setLoading] = useState(false)
+    const [deleteLoading, setDeleteLoading] = useState(false)
     const [newFolderId, setNewFolderId] = useState('')
     const history = useHistory()
     const {
@@ -59,8 +62,7 @@ export default function Home() {
     const {loading: loadingCurrent, current: userCurrent} = useSelector(state => state.user)
     const {loading: submitting, fileSubmit} = useFileCreate()
     const {loading: downloading, download} = useDownloadFile()
-//    useFetchFolder(newFolderId,setNewFolderId)
-   useFetchFolder()
+    useFetchFolder(newFolderId,setNewFolderId)
     // console.log({data})
     const {
         preview
@@ -73,6 +75,7 @@ export default function Home() {
         },
         validationSchema: folderValidationSchema,
         onSubmit: async (values) => {
+            setLoading(true)
             const currentTimeStamp = new Date().getTime()
             const id = uuidv4()
             const folder_password = uuidv4()
@@ -87,7 +90,13 @@ export default function Home() {
                     _password: cipher,
                 }
                 await window.contract.create_folder_v2(folder)
-                history.go(0)
+                setIsModalCreateFolderVisible(false)
+                message.success("Folder created!!!")
+                setNewFolderId(folder._id)
+                setLoading(false)
+                formik.resetForm()
+
+                // history.go(0)
             }
             else {
                 message.error("Invalid private key")
@@ -95,7 +104,7 @@ export default function Home() {
         }
     })
 
-    const {values, errors, handleChange, handleSubmit, setFieldValue} = formik
+    const {values, errors, touched, handleChange, handleSubmit, setFieldValue} = formik
 
     const [isModalCreateFolderVisible, setIsModalCreateFolderVisible] = useState(false);
     const [isModalUploadVisible, setIsModalUploadVisible] = useState(false);
@@ -104,11 +113,14 @@ export default function Home() {
         setIsModalCreateFolderVisible(true);
     };
     
-    // const handleOkCreateFolder = () => {
-    //     setLoading(true)
-    //     handleSubmit
-    //     setLoading(false)
-    // }
+    const handleOkCreateFolder = async() => {
+        if(values.type===''){
+            await setFieldValue('type', '1')
+            handleSubmit()
+        }else{
+            handleSubmit()
+        }
+    }
 
     const handleCancelCreateFolder = () => {
         formik.resetForm()
@@ -139,9 +151,8 @@ export default function Home() {
 
     const redirectToFolder = (id) => {
         history.push(`/v2?folder=${id}`)
-        // setNewFolderId(id)
-        // console.log(id)
-        history.go(0)
+        setNewFolderId(id)
+        // history.go(0)
     }
 
     const downloadFile = async (record) => {
@@ -194,16 +205,17 @@ export default function Home() {
             render(text, record) {
                 return (
                     <div>
-                        {!record.isFolder && !record.isTop && <div className="d-flex justify-content-evenly">
+                        {!record.isFolder && !record.isTop && <div className="d-flex" style={{float:"right"}}>
                             <Tooltip title="Download">
                                 <Button
                                     onClick={async () => downloadFile(record)}
+                                    className="mx-1"
                                 >
                                     <DownloadOutlined />
                                 </Button>
                             </Tooltip>
 
-                            {rootFolder.folder_type === 1 &&<Tooltip title="Share file">
+                            {(!!rootFolder && rootFolder.folder_type === 1) &&<Tooltip title="Share file">
                                 <ShareFileButton {...{...record, folder: currentFolderId}} />
                             </Tooltip>}
 
@@ -212,14 +224,17 @@ export default function Home() {
                                     type="File" 
                                     name={record.name} 
                                     handleDelete={async () => {
+                                        setDeleteLoading(true)
                                         await window.contract.remove_file_v2({_folder: currentFolderId, _file: record.id})
-                                        history.go(0)
+                                        setDeleteLoading(false)
+                                        message.success(`File ${record.name} deleted!!!`)
+                                        // history.go(0)
                                     }}
                                 />
                             </Tooltip>
                         </div>}
-                        {record.isFolder && !record.isTop && <div className="d-flex justify-content-evenly">
-                            {record.parent === userCurrent.account && record.folder_type === 2 &&<Tooltip title="Share file">
+                        {record.isFolder && !record.isTop && <div className="d-flex" style={{float:"right"}}>
+                            {record.parent === userCurrent.account && record.folder_type === 2 &&<Tooltip title="Share folder">
                                 <ShareFolderButton {...{...record, folder: currentFolderId}} />
                             </Tooltip>}
 
@@ -228,8 +243,12 @@ export default function Home() {
                                     type="Folder" 
                                     name={record.name} 
                                     handleDelete={async () => {
+                                        setDeleteLoading(true)
                                         await window.contract.remove_folder_v2({_folder: record.id})
-                                        history.go(0)
+                                        setNewFolderId('')
+                                        setDeleteLoading(false)
+                                        message.success(`Folder ${record.name} deleted!!!`)
+                                        // history.go(0)
                                     }}
                                 />
                             </Tooltip>
@@ -237,12 +256,14 @@ export default function Home() {
                     </div>
                 )
             }
+
         },
+
     ];
-
-
+console.log(rootFolder)
     return (
         <>
+        
         <div id="homepage">
             <div className="header">
                 <h2 className="title">My folders</h2>
@@ -263,9 +284,9 @@ export default function Home() {
                         <Modal 
                             title="Create folder" 
                             visible={isModalCreateFolderVisible} 
-                            onOk={handleSubmit} 
+                            onOk={handleOkCreateFolder} 
                             onCancel={handleCancelCreateFolder}
-                            // confirmLoading={submitting}
+                            confirmLoading={loading}
                             focusTriggerAfterClose={true}
                             maskClosable={false}
                         >
@@ -274,7 +295,7 @@ export default function Home() {
                                 <div className="input-group mb-3">
                                     <Input placeholder="Folder name" value={values.name || ''} onChange={handleChange('name')} />
                                 </div>
-                                {errors.name && <span className="error-text">{errors.name}</span>}
+                                {errors.name && touched.name && <span className="error-text">{errors.name}</span>}
                             </div>
                             {currentFolderId === userCurrent.account && <div>
                                 <label className="form-label">Folder type</label>
@@ -282,7 +303,7 @@ export default function Home() {
                                     <Option value="1">Private</Option>
                                     <Option value="2">Shareable</Option>
                                 </Select>
-                                {errors.type && <span className="error-text">{errors.type}</span>}
+                                {errors.type && touched.type && <span className="error-text">{errors.type}</span>}
                             </div>}
                         </Modal>
                     </div>
@@ -307,7 +328,7 @@ export default function Home() {
                                     <InboxOutlined />
                                 </p>
                                 <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                            </Dragger>,
+                            </Dragger>
                         </Modal>
                     </div>}
                 </div>
@@ -317,14 +338,17 @@ export default function Home() {
                     </Tooltip>
                 </div>
                 <div className="list-items mt-3">
+                <Spin spinning={deleteLoading}>
                     <Table 
                         columns={columns} 
                         dataSource={folderCurrent} 
                         rowKey={(record) => record.id} 
                     />
+                </Spin>
                 </div>
             </div>
         </div>
+
         </>
     )
 }
