@@ -193,19 +193,20 @@ export default function MainLayout({children}) {
 
     const redirect = (path) => {
         history.push(path)
-        history.go(0)
+        // history.go(0)
     }
 
     const handleCloseModalPrivateKey = () => {
         setModalKeyVisible(false)
     }
-
+    const currentPage = window.location.href
+    const selectPage = currentPage.includes("/shared_with_me") ? "4" : "2"
     return (
         <div id="page-layout-trigger">
             {isHideLayout ? <div>{children}</div> : <Layout>
                 <Sider trigger={null} collapsible collapsed={collapsed}>
                     <div className="logo"></div>
-                    <Menu theme="dark" mode="inline">
+                    <Menu theme="dark" mode="inline" defaultSelectedKeys={selectPage}>
                         <Menu.Item key="2" icon={<DatabaseOutlined />} onClick={() => redirect("/")}>
                             My Folders V2
                         </Menu.Item>
@@ -246,6 +247,7 @@ export default function MainLayout({children}) {
                 visible={isModalLoginVisible}
                 title={`Login as ${accountId}`}
                 onOk={loginHandleSubmit}
+                maskClosable={false}
                 footer={[
                     <Button
                         loading={loading}
@@ -277,6 +279,7 @@ export default function MainLayout({children}) {
                 visible={isModalVisible}
                 title="Web3 Storage token is required"
                 onOk={handleOk}
+                maskClosable={false}
                 footer={[
                     <Button
                         loading={loading}
@@ -290,7 +293,7 @@ export default function MainLayout({children}) {
             >
                 <div className="input-group mb-3 d-block">
                     <div className="form-label"><b>Web3Storage Token</b></div>
-                    <div>You can get or create your token at this <a href="https://web3.storage/account/" target="_blank">link</a></div>
+                    <div>You can get or create your token at this <a href="https://web3.storage/tokens/" target="_blank">link</a></div>
                     <TextArea 
                         placeholder="Web3Storage Token" 
                         onChange={handleChange('token')}
@@ -303,6 +306,7 @@ export default function MainLayout({children}) {
                 title="User's private key"
                 onOk={handleCloseModalPrivateKey}
                 onCancel={handleCloseModalPrivateKey}
+                maskClosable={false}
                 footer={[
                     <Button key="1" type="primary" onClick={downloadPrivateKey}>Download</Button>
                 ]}

@@ -12,7 +12,7 @@ import {
 import {useDispatch} from 'react-redux'
 import {getUrlParameter} from '../utils/url.utils'
 
-const useFetchSharedDocs = () => {
+const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -24,9 +24,10 @@ const useFetchSharedDocs = () => {
 
     const fetchSharedFolderDetail = async (folderId) => {
         const {accountId} = await window.walletConnection.account()
-        dispatch(setSharedFolderId(folderId))
-        const folder = await window.contract.get_folder_info_v2({folder_id: folderId})
-        const [root, root_id] = await window.contract.get_root({folder_id: folderId})
+        setNewFolderId(accountId)
+        dispatch(setSharedFolderId(newFolderId))
+        const folder = await window.contract.get_folder_info_v2({folder_id: newFolderId})
+        const [root, root_id] = await window.contract.get_root({folder_id: newFolderId})
         const sharedDocDetail = await window.contract.get_shared_doc_detail({_doc_id: `${root.created_by}_${accountId}_${root_id}`})
         const [sharedDoc, , file] = sharedDocDetail 
         const {children, files} = folder
@@ -113,7 +114,7 @@ const useFetchSharedDocs = () => {
             fetchSharedDoc()
         }
         
-    }, [page, limit]) 
+    }, [newFolderId, page, limit]) 
 
     return {
         loading,

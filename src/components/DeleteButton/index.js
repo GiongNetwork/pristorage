@@ -2,6 +2,7 @@ import React from 'react';
 import { 
     Button, 
     Modal, 
+    Tooltip
 } from 'antd'
 import {
     DeleteOutlined,
@@ -21,9 +22,7 @@ const DeleteButton = (props) => {
             icon: <ExclamationCircleOutlined />,
             content: name,
             onOk() {
-                handleDelete().then(() => {
-                    history.go(0)
-                })
+                handleDelete()
             },
             onCancel() {
             },
@@ -32,9 +31,11 @@ const DeleteButton = (props) => {
 
     return (
         <>
-        <Button danger onClick={showConfirm}>
-            <DeleteOutlined />
-        </Button>
+        <Tooltip title="Remove">
+            <Button danger onClick={showConfirm} className="mx-1">
+                <DeleteOutlined />
+            </Button>
+        </Tooltip>
         </>
     )
 }

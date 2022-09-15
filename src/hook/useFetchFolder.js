@@ -10,8 +10,9 @@ import {
 } from '../store/slice/folderV2.slice'
 import {useDispatch} from 'react-redux'
 import {getUrlParameter} from '../utils/url.utils'
+import { commonFolderSlice } from '../store/slice/folderV2.slice';
 
-const useFetchFolder = () => {
+const useFetchFolder = (newFolderId, setNewFolderId) => {
 
     const [folderItems, setFolderItems] = useState([])
     const [root, setRootFolder] = useState({})
@@ -22,9 +23,10 @@ const useFetchFolder = () => {
     const fetchData = async () => {
         const {accountId} = await window.walletConnection.account()
         const folderId = getUrlParameter('folder') ? getUrlParameter('folder') : accountId
-        dispatch(setFolderId(folderId))
-        const folderData = await window.contract.get_folder_info_v2({folder_id: folderId})
-        const [root, root_id] = await window.contract.get_root({folder_id: folderId})
+        setNewFolderId(folderId)
+        dispatch(setFolderId(newFolderId))
+        const folderData = await window.contract.get_folder_info_v2({folder_id: newFolderId})
+        const [root, root_id] = await window.contract.get_root({folder_id: newFolderId})
         const {children, files} = folderData
         const childrenInDetail = await Promise.all(children.map(child => {
             return window.contract.get_folder_info_v2({folder_id: child}).then(result => {
@@ -57,7 +59,7 @@ const useFetchFolder = () => {
     useEffect(() => {
         setLoading(true)
         fetchData()
-    }, []) 
+    }, [newFolderId]) 
 
     return {
         folderItems,
