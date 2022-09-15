@@ -7529,6 +7529,8 @@ function getArrayBuffer(file) {
 }
 
 function getSplittedEncodeFiles(file) {
+  console.log('FILE_MAX_SIZE', FILE_MAX_SIZE);
+  console.log('file', file);
   const chunks = createChunks(file, FILE_MAX_SIZE);
   const files = chunks.map((chunk, index) => {
     return new File([chunk], `${index}_${file.name}`);
@@ -7650,7 +7652,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57142" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39479" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
