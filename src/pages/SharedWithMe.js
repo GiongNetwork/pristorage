@@ -43,6 +43,8 @@ const folderValidationSchema = Yup.object().shape({
 export default function SharedWithMe() {
     const [loading, setLoading] = useState(false)
     const [newFolderId, setNewFolderId] = useState('')
+    const [upLoadDisable, setUpLoadDisable] = useState(false)
+    const [file, setFile] = useState({})
     const history = useHistory()
 
     const [data, setData] = useState([])
@@ -111,6 +113,15 @@ export default function SharedWithMe() {
     const handleUpload = () => {
         setIsModalUploadVisible(false);
     };
+
+    const handleUploadFile = async() => {
+        setLoading(true)
+        await fileSubmit(file, rootFolder, currentFolderId)
+        message.success('Upload success!!!')
+        setIsModalUploadVisible(false)
+        setLoading(false)
+        // setNewFolderId('')
+    }
     
     const handleCancelUpload = () => {
         setIsModalUploadVisible(false);
@@ -122,13 +133,16 @@ export default function SharedWithMe() {
         onChange(info) {
             const { status } = info.file;
             if (status !== 'uploading') {
-                fileSubmit(info.file.originFileObj, rootFolder, currentFolderId)
+                fileSubmit(file, rootFolder, currentFolderId)
             }
         },
         onDrop(e) {
             console.log('Dropped files', e.dataTransfer.files);
             fileSubmit(e.dataTransfer.files[0])
         },
+        showUploadList: {
+            showRemoveIcon: false,
+        }
     };
 
     const redirectToFolder = (id) => {
@@ -255,8 +269,17 @@ export default function SharedWithMe() {
                             onCancel={handleCancelUpload}
                             maskClosable={false}
                             footer={[]}
+                            // okText="Upload"
+                            // onOk={handleUploadFile}
+                            // confirmLoading={loading}
                         >
-                            <Dragger {...props}>
+                            <Dragger {...props} disabled={upLoadDisable} beforeUpload={(inf)=> {
+                                if(!!inf){
+                                    setUpLoadDisable(true)
+                                    setFile(inf)
+                                }
+                                return false
+                            }}>
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
                                 </p>

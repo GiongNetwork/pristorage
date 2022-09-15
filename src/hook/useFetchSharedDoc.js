@@ -90,7 +90,8 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
                         children: undefined,
                         files: undefined
                     })
-                } else {
+                } 
+                if(!!file) {
                     data.push({
                         ...file, 
                         docId: docId,
