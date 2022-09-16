@@ -43,17 +43,20 @@ const ShareFolderButton = (props) => {
             const user = await window.contract.get_user({account_id: values.account})
             if (!user) {
                 message.error(`User "${values.account}" not found`)
+                setLoading(false)
                 return
             }
             const {plaintext, success} = await decryptStringTypeData(userCurrent.privateKey, props.folder_password)
             if (!success) {
                 message.error(`Wrong user password`)
+                setLoading(false)
                 return
             }
             const {public_key} = user
             const {cipher, success: isEncryptSuccess} = await encryptStringTypeData(public_key, plaintext)
             if (!isEncryptSuccess) {
                 message.error(`fail to encrypt password`)
+                setLoading(false)
                 return
             }
             const current = new Date().getTime()
@@ -89,6 +92,7 @@ const ShareFolderButton = (props) => {
     
     const handleCancelShare = () => {
         setIsModalShareVisible(false);
+        setLoading(false)
         accountFormik.resetForm()
     };
 
@@ -105,6 +109,7 @@ const ShareFolderButton = (props) => {
             onOk={handleSubmit} 
             onCancel={handleCancelShare}
             confirmLoading={loading}
+            cancelButtonProps={{disabled: loading}}
             maskClosable={false}
         >
             <label className="form-label">Share with</label>

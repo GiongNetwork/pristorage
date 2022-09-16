@@ -17,7 +17,8 @@ import {
     Input,
     Modal,
     Upload,
-    message 
+    message,
+    Spin, 
 } from 'antd';
 import { 
     useSelector, 
@@ -33,6 +34,7 @@ import useFetchSharedDocs from '../hook/useFetchSharedDoc'
 import useFileCreate from '../hook/useFileCreate'
 import useDownloadFile from '../hook/useDownloadFile'
 import useFilePreview from '../hook/useFilePreview'
+import { getUrlParameter } from '../utils/url.utils';
 
 const { Dragger } = Upload;
 
@@ -43,6 +45,8 @@ const folderValidationSchema = Yup.object().shape({
 export default function SharedWithMe() {
     const [loading, setLoading] = useState(false)
     const [newFolderId, setNewFolderId] = useState('')
+    const [upLoadDisable, setUpLoadDisable] = useState(false)
+    const [file, setFile] = useState({})
     const history = useHistory()
 
     const [data, setData] = useState([])
@@ -111,6 +115,15 @@ export default function SharedWithMe() {
     const handleUpload = () => {
         setIsModalUploadVisible(false);
     };
+
+    const handleUploadFile = async() => {
+        setLoading(true)
+        await fileSubmit(file, rootFolder, currentFolderId)
+        message.success('Upload success!!!')
+        setIsModalUploadVisible(false)
+        setLoading(false)
+        // setNewFolderId('')
+    }
     
     const handleCancelUpload = () => {
         setIsModalUploadVisible(false);
@@ -122,13 +135,17 @@ export default function SharedWithMe() {
         onChange(info) {
             const { status } = info.file;
             if (status !== 'uploading') {
-                fileSubmit(info.file.originFileObj, rootFolder, currentFolderId)
+                setLoading(true)
+                fileSubmit(file, rootFolder, currentFolderId)
             }
         },
         onDrop(e) {
             console.log('Dropped files', e.dataTransfer.files);
             fileSubmit(e.dataTransfer.files[0])
         },
+        showUploadList: {
+            showRemoveIcon: false,
+        }
     };
 
     const redirectToFolder = (id) => {
@@ -206,6 +223,7 @@ export default function SharedWithMe() {
             }
         },
     ];
+    const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin>:"Click or drag file to this area to upload"
 
     return (
         <>
@@ -215,7 +233,7 @@ export default function SharedWithMe() {
                 <hr />
             </div>
             <div className="content">
-                {permission === 2  && <div className="actions d-flex justify-content-end">
+                {!!getUrlParameter("doc_id") && permission === 2  && <div className="actions d-flex justify-content-end">
                     <div className="action-button">
                         <Tooltip title='Create folder'>
                             <Button 
@@ -232,6 +250,7 @@ export default function SharedWithMe() {
                             onCancel={handleCancelCreateFolder}
                             confirmLoading={loading}
                             maskClosable={false}
+                            cancelButtonProps={{disabled: loading}}
                         >
                             <label className="form-label">Folder name</label>
                             <div className="input-group mb-3">
@@ -255,12 +274,21 @@ export default function SharedWithMe() {
                             onCancel={handleCancelUpload}
                             maskClosable={false}
                             footer={[]}
+                            // okText="Upload"
+                            // onOk={handleUploadFile}
+                            // confirmLoading={loading}
                         >
-                            <Dragger {...props}>
+                            <Dragger {...props} disabled={upLoadDisable} beforeUpload={(inf)=> {
+                                if(!!inf){
+                                    setUpLoadDisable(true)
+                                    setFile(inf)
+                                }
+                                return false
+                            }}>
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
                                 </p>
-                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                <p className="ant-upload-text">{fileUploading}</p>
                             </Dragger>
                         </Modal>
                     </div>

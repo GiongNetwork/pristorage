@@ -24,7 +24,7 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
 
     const fetchSharedFolderDetail = async (folderId) => {
         const {accountId} = await window.walletConnection.account()
-        setNewFolderId(accountId)
+        setNewFolderId(folderId)
         dispatch(setSharedFolderId(newFolderId))
         const folder = await window.contract.get_folder_info_v2({folder_id: newFolderId})
         const [root, root_id] = await window.contract.get_root({folder_id: newFolderId})
@@ -90,7 +90,8 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
                         children: undefined,
                         files: undefined
                     })
-                } else {
+                } 
+                if(!!file) {
                     data.push({
                         ...file, 
                         docId: docId,

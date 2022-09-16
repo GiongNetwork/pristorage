@@ -49,8 +49,10 @@ const folderValidationSchema = Yup.object().shape({
 
 export default function Home() {
     const [loading, setLoading] = useState(false)
-    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [tableLoading, setTableLoading] = useState(false)
+    const [upLoadDisable, setUpLoadDisable] = useState(false)
     const [newFolderId, setNewFolderId] = useState('')
+    const [file, setFile] = useState({})
     const history = useHistory()
     const {
         loading: folderLoading, 
@@ -63,7 +65,7 @@ export default function Home() {
     const {loading: submitting, fileSubmit} = useFileCreate()
     const {loading: downloading, download} = useDownloadFile()
     useFetchFolder(newFolderId,setNewFolderId)
-    // console.log({data})
+
     const {
         preview
     } = useFilePreview()
@@ -122,6 +124,15 @@ export default function Home() {
         }
     }
 
+    const handleUploadFile = async() => {
+        setLoading(true)
+        await fileSubmit(file, rootFolder, currentFolderId)
+        message.success('Upload success!!!')
+        setIsModalUploadVisible(false)
+        setLoading(false)
+        // setNewFolderId('')
+    }
+
     const handleCancelCreateFolder = () => {
         formik.resetForm()
         setIsModalCreateFolderVisible(false);
@@ -133,6 +144,8 @@ export default function Home() {
     
     const handleCancelUpload = () => {
         setIsModalUploadVisible(false);
+        setFile({})
+        setUpLoadDisable(false)
     };
     
     const props = {
@@ -141,12 +154,22 @@ export default function Home() {
         onChange(info) {
             const { status } = info.file;
             if (status !== 'uploading') {
-                fileSubmit(info.file.originFileObj, rootFolder, currentFolderId)
+                setLoading(true)
+                fileSubmit(file, rootFolder, currentFolderId)
+            }
+            // console.log(info.file.originFileObj)
+            if (status === 'done') {
+                message.success(`${info.file.name} file uploaded successfully.`);
+            } else if (status === 'error') {
+                message.error(`${info.file.name} file upload failed.`);
             }
         },
         onDrop(e) {
             console.log('Dropped files', e.dataTransfer.files);
         },
+        showUploadList: {
+            showRemoveIcon: false,
+        }
     };
 
     const redirectToFolder = (id) => {
@@ -184,7 +207,6 @@ export default function Home() {
             title: 'Name',
             dataIndex: 'name',
             render(text, record) {
-                // console.log(record)
                 return (
                     <div>
                         {record.isFolder  ? 
@@ -224,9 +246,10 @@ export default function Home() {
                                     type="File" 
                                     name={record.name} 
                                     handleDelete={async () => {
-                                        setDeleteLoading(true)
+                                        setTableLoading(true)
                                         await window.contract.remove_file_v2({_folder: currentFolderId, _file: record.id})
-                                        setDeleteLoading(false)
+                                        setNewFolderId('')
+                                        setTableLoading(false)
                                         message.success(`File ${record.name} deleted!!!`)
                                         // history.go(0)
                                     }}
@@ -243,10 +266,10 @@ export default function Home() {
                                     type="Folder" 
                                     name={record.name} 
                                     handleDelete={async () => {
-                                        setDeleteLoading(true)
+                                        setTableLoading(true)
                                         await window.contract.remove_folder_v2({_folder: record.id})
                                         setNewFolderId('')
-                                        setDeleteLoading(false)
+                                        setTableLoading(false)
                                         message.success(`Folder ${record.name} deleted!!!`)
                                         // history.go(0)
                                     }}
@@ -260,7 +283,8 @@ export default function Home() {
         },
 
     ];
-console.log(rootFolder)
+    const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin>:"Click or drag file to this area to upload"
+
     return (
         <>
         
@@ -275,8 +299,8 @@ console.log(rootFolder)
                         <Tooltip title="Create folder">
                             <Button 
                                 icon={<FolderAddOutlined style={{ fontSize: '18px' }} />} 
-                                onClick={showModalCreateFolder} 
-                                loading={folderLoading} 
+                                onClick={showModalCreateFolder}
+                                disabled={tableLoading}
                             >
                                 Create folder
                             </Button>
@@ -289,6 +313,7 @@ console.log(rootFolder)
                             confirmLoading={loading}
                             focusTriggerAfterClose={true}
                             maskClosable={false}
+                            cancelButtonProps={{disabled: loading}}
                         >
                             <div>
                                 <label className="form-label">Folder name</label>
@@ -312,6 +337,7 @@ console.log(rootFolder)
                             <Button 
                                 icon={<UploadOutlined style={{ fontSize: '18px' }} />} 
                                 onClick={showModalUpload}
+                                disabled={tableLoading}
                             >
                                 Upload file
                             </Button>
@@ -321,24 +347,33 @@ console.log(rootFolder)
                             visible={isModalUploadVisible} 
                             onCancel={handleCancelUpload}
                             footer={[]}
+                            // okText="Upload"
+                            // onOk={handleUploadFile}
+                            // confirmLoading={loading}
                             maskClosable={false}
                         >
-                            <Dragger {...props}>
+                            <Dragger {...props} disabled={upLoadDisable} beforeUpload={(inf)=> {
+                                if(!!inf){
+                                    setUpLoadDisable(true)
+                                    setFile(inf)
+                                }
+                                return false
+                            }}>
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
                                 </p>
-                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                <p className="ant-upload-text">{fileUploading}</p>
                             </Dragger>
                         </Modal>
                     </div>}
                 </div>
                 <div>
                     <Tooltip title="Back">
-                        <Button onClick={() => redirectToFolder(parentFolder)}><ArrowLeftOutlined /></Button>
+                        <Button onClick={() => redirectToFolder(parentFolder)} disabled={tableLoading}><ArrowLeftOutlined /></Button>
                     </Tooltip>
                 </div>
                 <div className="list-items mt-3">
-                <Spin spinning={deleteLoading}>
+                <Spin spinning={tableLoading}>
                     <Table 
                         columns={columns} 
                         dataSource={folderCurrent} 
