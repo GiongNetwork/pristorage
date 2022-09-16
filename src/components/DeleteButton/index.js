@@ -18,7 +18,7 @@ const DeleteButton = (props) => {
 
     const showConfirm = () => {
         confirm({
-            title: `Do you Want to delete this ${type}?`,
+            title: `Do you want to delete this ${type}?`,
             icon: <ExclamationCircleOutlined />,
             content: name,
             onOk() {
