@@ -12,9 +12,9 @@ import {
 import {useDispatch} from 'react-redux'
 import {getUrlParameter} from '../utils/url.utils'
 
-const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
+const useFetchSharedDocs = (newFolderId, setNewFolderId, setTableLoading) => {
 
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [page, setPage] = useState(0)
     const [total, setTotal] = useState(0)
@@ -23,6 +23,7 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
     const dispatch = useDispatch()
 
     const fetchSharedFolderDetail = async (folderId) => {
+        setTableLoading(true)
         const {accountId} = await window.walletConnection.account()
         setNewFolderId(folderId)
         dispatch(setSharedFolderId(newFolderId))
@@ -51,7 +52,7 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
             })
         }))
         let data = [...childrenInDetail, ...filesDetail]
-        setLoading(false)
+        // setLoading(false)
         dispatch(setRootSharedFolder({
             ...root,
             id: root_id,
@@ -61,9 +62,11 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
         dispatch(setCurrentSharedData(data))
         dispatch(setParentOfSharedFolder(folder.parent))
         dispatch(setPermission(sharedDoc.permissions))
+        setTableLoading(false)
     }
 
     const fetchSharedDoc = async () => {
+        setTableLoading(true)
         let data = []
         const {accountId} = await window.walletConnection.account()
         const sharedDocOfUser = await window.contract.get_shared_doc_of_user({_account_id: accountId})
@@ -103,11 +106,12 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
                 }
             })
             dispatch(setCurrentSharedData(data))
+            setTableLoading(false)
         })
     }
 
     useEffect(() => {
-        setLoading(true)
+        // setLoading(true)
         const folderId = getUrlParameter('doc_id')
         if  (folderId) {
             fetchSharedFolderDetail(folderId)
@@ -118,7 +122,7 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId) => {
     }, [newFolderId, page, limit]) 
 
     return {
-        loading,
+        // loading,
         error,
         setPage,
         setLimit,

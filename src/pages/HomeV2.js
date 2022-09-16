@@ -64,7 +64,7 @@ export default function Home() {
     const {loading: loadingCurrent, current: userCurrent} = useSelector(state => state.user)
     const {loading: submitting, fileSubmit} = useFileCreate()
     const {loading: downloading, download} = useDownloadFile()
-    useFetchFolder(newFolderId,setNewFolderId)
+    useFetchFolder(newFolderId,setNewFolderId, setTableLoading)
 
     const {
         preview
@@ -172,7 +172,7 @@ export default function Home() {
         }
     };
 
-    const redirectToFolder = (id) => {
+    const redirectToFolder = async(id) => {
         history.push(`/v2?folder=${id}`)
         setNewFolderId(id)
         // history.go(0)
@@ -373,7 +373,7 @@ export default function Home() {
                     </Tooltip>
                 </div>
                 <div className="list-items mt-3">
-                <Spin spinning={tableLoading}>
+                <Spin spinning={tableLoading} tip='Loading data...'>
                     <Table 
                         columns={columns} 
                         dataSource={folderCurrent} 
