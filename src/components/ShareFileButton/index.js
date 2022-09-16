@@ -107,6 +107,7 @@ const ShareFileButton = (props) => {
             onOk={handleSubmit} 
             onCancel={handleCancelShare}
             confirmLoading={loading}
+            cancelButtonProps={{disabled: loading}}
             maskClosable={false}
         >
             <div className="input-group mb-3">

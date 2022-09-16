@@ -17,7 +17,8 @@ import {
     Input,
     Modal,
     Upload,
-    message 
+    message,
+    Spin, 
 } from 'antd';
 import { 
     useSelector, 
@@ -133,6 +134,7 @@ export default function SharedWithMe() {
         onChange(info) {
             const { status } = info.file;
             if (status !== 'uploading') {
+                setLoading(true)
                 fileSubmit(file, rootFolder, currentFolderId)
             }
         },
@@ -220,6 +222,7 @@ export default function SharedWithMe() {
             }
         },
     ];
+    const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin>:"Click or drag file to this area to upload"
 
     return (
         <>
@@ -246,6 +249,7 @@ export default function SharedWithMe() {
                             onCancel={handleCancelCreateFolder}
                             confirmLoading={loading}
                             maskClosable={false}
+                            cancelButtonProps={{disabled: loading}}
                         >
                             <label className="form-label">Folder name</label>
                             <div className="input-group mb-3">
@@ -283,7 +287,7 @@ export default function SharedWithMe() {
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
                                 </p>
-                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                <p className="ant-upload-text">{fileUploading}</p>
                             </Dragger>
                         </Modal>
                     </div>

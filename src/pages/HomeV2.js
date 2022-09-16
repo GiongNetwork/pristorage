@@ -154,9 +154,10 @@ export default function Home() {
         onChange(info) {
             const { status } = info.file;
             if (status !== 'uploading') {
+                setLoading(true)
                 fileSubmit(file, rootFolder, currentFolderId)
             }
-            console.log(info.file.originFileObj)
+            // console.log(info.file.originFileObj)
             if (status === 'done') {
                 message.success(`${info.file.name} file uploaded successfully.`);
             } else if (status === 'error') {
@@ -282,6 +283,7 @@ export default function Home() {
         },
 
     ];
+    const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin>:"Click or drag file to this area to upload"
 
     return (
         <>
@@ -311,6 +313,7 @@ export default function Home() {
                             confirmLoading={loading}
                             focusTriggerAfterClose={true}
                             maskClosable={false}
+                            cancelButtonProps={{disabled: loading}}
                         >
                             <div>
                                 <label className="form-label">Folder name</label>
@@ -359,7 +362,7 @@ export default function Home() {
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
                                 </p>
-                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                                <p className="ant-upload-text">{fileUploading}</p>
                             </Dragger>
                         </Modal>
                     </div>}
