@@ -208,10 +208,10 @@ export default function MainLayout({children}) {
                     <div className="logo"></div>
                     <Menu theme="dark" mode="inline" defaultSelectedKeys={selectPage}>
                         <Menu.Item key="2" icon={<DatabaseOutlined />} onClick={() => redirect("/")}>
-                            My Folders V2
+                            My Folders
                         </Menu.Item>
                         <Menu.Item key="4" icon={<UserSwitchOutlined />} onClick={() => redirect("/shared_with_me")}>
-                            Shared With Me V2
+                            Shared With Me
                         </Menu.Item>
                     </Menu>
                 </Sider>
