@@ -34,6 +34,7 @@ import useFetchSharedDocs from '../hook/useFetchSharedDoc'
 import useFileCreate from '../hook/useFileCreate'
 import useDownloadFile from '../hook/useDownloadFile'
 import useFilePreview from '../hook/useFilePreview'
+import { getUrlParameter } from '../utils/url.utils';
 
 const { Dragger } = Upload;
 
@@ -232,7 +233,7 @@ export default function SharedWithMe() {
                 <hr />
             </div>
             <div className="content">
-                {permission === 2  && <div className="actions d-flex justify-content-end">
+                {!!getUrlParameter("doc_id") && permission === 2  && <div className="actions d-flex justify-content-end">
                     <div className="action-button">
                         <Tooltip title='Create folder'>
                             <Button 

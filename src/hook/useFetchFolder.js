@@ -25,7 +25,7 @@ const useFetchFolder = (newFolderId, setNewFolderId) => {
         const folderId = getUrlParameter('folder') ? getUrlParameter('folder') : accountId
         setNewFolderId(folderId)
         dispatch(setFolderId(newFolderId))
-        const folderData = await window.contract.get_folder_info_v2({folder_id: newFolderId})
+        const folderData = await window.contract.get_folder_info_v2({folder_id: newFolderId || folderId})
         const [root, root_id] = await window.contract.get_root({folder_id: newFolderId})
         const {children, files} = folderData
         const childrenInDetail = await Promise.all(children.map(child => {
