@@ -151,7 +151,7 @@ export default function SharedWithMe() {
     const redirectToFolder = (id) => {
         if (!id || id === rootFolder?.parent) {
             history.push(`/shared_with_me`)
-            setNewFolderId('')
+            setNewFolderId(id)
             // history.go(0)
         } else {
             history.push(`/shared_with_me?doc_id=${id}`)
@@ -159,7 +159,8 @@ export default function SharedWithMe() {
             // history.go(0)
         }
     }
-
+    console.log(!!getUrlParameter("doc_id"), !window.location.href.includes('shared_with_me'))
+if(!window.location.href.includes('shared_with_me')){ }
     const downloadFile = async (record) => {
         const {cid, encrypted_password, name, file_type} = record
         if (encrypted_password) {
