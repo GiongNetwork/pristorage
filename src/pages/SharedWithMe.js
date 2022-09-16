@@ -240,6 +240,7 @@ export default function SharedWithMe() {
                             <Button 
                                 icon={<FolderAddOutlined style={{ fontSize: '18px' }} />} 
                                 onClick={showModalCreateFolder} 
+                                disabled={tableLoading}
                             >
                                 Create folder
                             </Button>
@@ -265,6 +266,7 @@ export default function SharedWithMe() {
                             <Button 
                                 icon={<UploadOutlined style={{ fontSize: '18px' }} />} 
                                 onClick={showModalUpload}
+                                disabled={tableLoading}
                             >
                                 Upload file
                             </Button>
@@ -297,7 +299,7 @@ export default function SharedWithMe() {
                 <div className="list-items mt-3">
                     <div>
                         <Tooltip title="Back">
-                            <Button onClick={() => redirectToFolder(parentFolder)}><ArrowLeftOutlined /></Button>
+                            <Button onClick={() => redirectToFolder(parentFolder)} disabled={tableLoading}><ArrowLeftOutlined /></Button>
                         </Tooltip>
                     </div>
                     <div className="mt-3">
