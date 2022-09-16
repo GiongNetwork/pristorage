@@ -44,6 +44,7 @@ const folderValidationSchema = Yup.object().shape({
 
 export default function SharedWithMe() {
     const [loading, setLoading] = useState(false)
+    const [tableLoading, setTableLoading] = useState(false)
     const [newFolderId, setNewFolderId] = useState('')
     const [upLoadDisable, setUpLoadDisable] = useState(false)
     const [file, setFile] = useState({})
@@ -61,7 +62,7 @@ export default function SharedWithMe() {
     } = useSelector(state => state.sharedWithMe)
     const {loading: submitting, fileSubmit} = useFileCreate()
     const {loading: downloading, download} = useDownloadFile()
-    useFetchSharedDocs(newFolderId, setNewFolderId)
+    useFetchSharedDocs(newFolderId, setNewFolderId, setTableLoading)
     const {
         preview
     } = useFilePreview()
@@ -300,11 +301,13 @@ export default function SharedWithMe() {
                         </Tooltip>
                     </div>
                     <div className="mt-3">
+                    <Spin spinning={tableLoading} tip='Loading data...'>
                         <Table 
                             columns={columns} 
                             dataSource={folderCurrent} 
                             rowKey={(record) => record.id} 
                         />
+                    </Spin>
                     </div>
                 </div>
             </div>

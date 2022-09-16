@@ -12,15 +12,16 @@ import {useDispatch} from 'react-redux'
 import {getUrlParameter} from '../utils/url.utils'
 import { commonFolderSlice } from '../store/slice/folderV2.slice';
 
-const useFetchFolder = (newFolderId, setNewFolderId) => {
+const useFetchFolder = (newFolderId, setNewFolderId, setTableLoading) => {
 
     const [folderItems, setFolderItems] = useState([])
     const [root, setRootFolder] = useState({})
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const dispatch = useDispatch()
 
     const fetchData = async () => {
+        setTableLoading(true)
         const {accountId} = await window.walletConnection.account()
         const folderId = getUrlParameter('folder') ? getUrlParameter('folder') : accountId
         setNewFolderId(folderId)
@@ -50,21 +51,22 @@ const useFetchFolder = (newFolderId, setNewFolderId) => {
         let dataMapping = [...childrenInDetail, ...filesDetail]
         setRootFolder(root)
         setFolderItems(dataMapping)
-        setLoading(false)
+        // setLoading(false)
         dispatch(setRoot(root))
         dispatch(setCurrent(dataMapping))
         dispatch(setParentFolder(folderData.parent))
+        setTableLoading(false)
     }
 
     useEffect(() => {
-        setLoading(true)
+        // setLoading(true)
         fetchData()
     }, [newFolderId]) 
 
     return {
         folderItems,
         root,
-        loading,
+        // loading,
         error
     }
 }

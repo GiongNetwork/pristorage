@@ -193,7 +193,7 @@ export default function MainLayout({children}) {
 
     const redirect = (path) => {
         history.push(path)
-        history.go(0)
+        // history.go(0)
     }
 
     const handleCloseModalPrivateKey = () => {
