@@ -44,17 +44,20 @@ const ShareFileButton = (props) => {
             const user = await window.contract.get_user({account_id: values.account})
             if (!user) {
                 message.error(`User "${values.account}" not found`)
+                setLoading(false)
                 return
             }
             const {plaintext, success: decryptStatus} = await decryptStringTypeData(userCurrent.privateKey, props.encrypted_password)
             if (!decryptStatus) {
                 message.error(`Wrong user password`)
+                setLoading(false)
                 return
             }
             const {public_key} = user
             const {cipher, success} = await encryptStringTypeData(public_key, plaintext)
             if (!success) {
                 message.error(`Fail to encrypt password`)
+                setLoading(false)
                 return
             }
             const current = new Date().getTime()
@@ -92,6 +95,7 @@ const ShareFileButton = (props) => {
     const handleCancelShare = () => {
         setIsModalShareVisible(false);
         accountFormik.resetForm()
+        setLoading(false)
     };
 
     return (
