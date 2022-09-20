@@ -162,7 +162,7 @@ export default function Home() {
             const { status } = info.file;
             if (status !== 'uploading') {
                 setLoading(true)
-                fileSubmit(file, rootFolder, currentFolderId, setIsModalUploadVisible)
+                fileSubmit(file, rootFolder, currentFolderId, setIsModalUploadVisible, setLoading)
             }
             // console.log(info.file.originFileObj)
             if (status === 'done') {
@@ -304,7 +304,7 @@ export default function Home() {
 
     ];
     const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin> : "Click or drag file to this area to upload"
-console.log(loading)
+
     return (
         <>
         
