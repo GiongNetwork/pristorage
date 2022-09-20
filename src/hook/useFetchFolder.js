@@ -28,7 +28,7 @@ const useFetchFolder = (newFolderId, setNewFolderId, setTableLoading) => {
         dispatch(setFolderId(newFolderId))
         const folderData = await window.contract.get_folder_info_v2({folder_id: newFolderId || folderId})
         const [root, root_id] = await window.contract.get_root({folder_id: newFolderId})
-        const {children, files} = folderData
+        const {children = [], files = []} = folderData || {}
         const childrenInDetail = await Promise.all(children.map(child => {
             return window.contract.get_folder_info_v2({folder_id: child}).then(result => {
                 return {
@@ -54,7 +54,7 @@ const useFetchFolder = (newFolderId, setNewFolderId, setTableLoading) => {
         // setLoading(false)
         dispatch(setRoot(root))
         dispatch(setCurrent(dataMapping))
-        dispatch(setParentFolder(folderData.parent))
+        dispatch(setParentFolder(folderData?.parent))
         setTableLoading(false)
     }
 

@@ -29,39 +29,41 @@ const useFetchSharedDocs = (newFolderId, setNewFolderId, setTableLoading) => {
         dispatch(setSharedFolderId(newFolderId))
         const folder = await window.contract.get_folder_info_v2({folder_id: newFolderId})
         const [root, root_id] = await window.contract.get_root({folder_id: newFolderId})
-        const sharedDocDetail = await window.contract.get_shared_doc_detail({_doc_id: `${root.created_by}_${accountId}_${root_id}`})
-        const [sharedDoc, , file] = sharedDocDetail 
-        const {children, files} = folder
-        const childrenInDetail = await Promise.all(children.map(child => {
-            return window.contract.get_folder_info_v2({folder_id: child}).then(result => {
-                return {
-                    ...result, 
-                    id: child, 
-                    isFolder: true,
-                    numOfFolders: result.children.length,
-                    numOfFiles: result.files.length,
-                    file_type: 'folder',
-                    children: undefined,
-                    files: undefined
-                };
-            })
-        }))
-        const filesDetail = await Promise.all(files.map(id => {
-            return window.contract.get_file_info({file_id: id}).then(result => {
-                return {...result, id, isFolder: false}
-            })
-        }))
-        let data = [...childrenInDetail, ...filesDetail]
-        // setLoading(false)
-        dispatch(setRootSharedFolder({
-            ...root,
-            id: root_id,
-            folder_password: sharedDoc.share_password,
-            permissions: sharedDoc.permissions,
-        }))
-        dispatch(setCurrentSharedData(data))
-        dispatch(setParentOfSharedFolder(folder.parent))
-        dispatch(setPermission(sharedDoc.permissions))
+        if (root) {
+            const sharedDocDetail = await window.contract.get_shared_doc_detail({_doc_id: `${root.created_by}_${accountId}_${root_id}`})
+            const [sharedDoc, , file] = sharedDocDetail 
+            const {children, files} = folder
+            const childrenInDetail = await Promise.all(children.map(child => {
+                return window.contract.get_folder_info_v2({folder_id: child}).then(result => {
+                    return {
+                        ...result, 
+                        id: child, 
+                        isFolder: true,
+                        numOfFolders: result.children.length,
+                        numOfFiles: result.files.length,
+                        file_type: 'folder',
+                        children: undefined,
+                        files: undefined
+                    };
+                })
+            }))
+            const filesDetail = await Promise.all(files.map(id => {
+                return window.contract.get_file_info({file_id: id}).then(result => {
+                    return {...result, id, isFolder: false}
+                })
+            }))
+            let data = [...childrenInDetail, ...filesDetail]
+            // setLoading(false)
+            dispatch(setRootSharedFolder({
+                ...root,
+                id: root_id,
+                folder_password: sharedDoc.share_password,
+                permissions: sharedDoc.permissions,
+            }))
+            dispatch(setCurrentSharedData(data))
+            dispatch(setParentOfSharedFolder(folder.parent))
+            dispatch(setPermission(sharedDoc.permissions))
+        }        
         setTableLoading(false)
     }
 

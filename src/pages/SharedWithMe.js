@@ -85,12 +85,19 @@ export default function SharedWithMe() {
                 _created_at: currentTimeStamp,
                 _type: null,
             }
-            await window.contract.create_folder_v2(folder)
-            setIsModalCreateFolderVisible(false)
-            message.success("Folder created!!!")
-            setNewFolderId(folder._id)
-            setLoading(false)
-            formik.resetForm()
+
+            try {
+                await window.contract.create_folder_v2(folder)
+                setIsModalCreateFolderVisible(false)
+                message.success("Folder created!!!")
+                setNewFolderId(folder._id)
+                formik.resetForm()             
+            } catch (error) {
+                message.error(error.message, 10)
+            } finally {
+                setLoading(false)
+            }
+            
             // history.go(0)
         }
     })
@@ -116,15 +123,6 @@ export default function SharedWithMe() {
     const handleUpload = () => {
         setIsModalUploadVisible(false);
     };
-
-    const handleUploadFile = async() => {
-        setLoading(true)
-        await fileSubmit(file, rootFolder, currentFolderId)
-        message.success('Upload success!!!')
-        setIsModalUploadVisible(false)
-        setLoading(false)
-        // setNewFolderId('')
-    }
     
     const handleCancelUpload = () => {
         setIsModalUploadVisible(false);
@@ -137,12 +135,12 @@ export default function SharedWithMe() {
             const { status } = info.file;
             if (status !== 'uploading') {
                 setLoading(true)
-                fileSubmit(file, rootFolder, currentFolderId)
+                fileSubmit(file, rootFolder, currentFolderId, setIsModalUploadVisible)
             }
         },
         onDrop(e) {
             console.log('Dropped files', e.dataTransfer.files);
-            fileSubmit(e.dataTransfer.files[0])
+            // fileSubmit(e.dataTransfer.files[0])
         },
         showUploadList: {
             showRemoveIcon: false,

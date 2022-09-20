@@ -92,10 +92,15 @@ export default function MainLayout({children}) {
                 window.localStorage.setItem(`${accountId}_private_key`, privateKey)
                 window.localStorage.setItem(`${accountId}_web3_storage_token`, values.token)
                 const current = new Date().getTime()
-                await window.contract.sign_up({_public_key: publicKey, _encrypted_token: cipher, _created_at: current})
-                setAppPrivateKey(privateKey)
-                setIsModalVisible(false)
-                setModalKeyVisible(true)
+                try {
+                    await window.contract.sign_up({_public_key: publicKey, _encrypted_token: cipher, _created_at: current})
+                    setAppPrivateKey(privateKey)
+                    setIsModalVisible(false)
+                    setModalKeyVisible(true)
+                } catch (error) {
+                    message.error(error.message, 10)
+                }
+                
             } else {
                 message.error('Fail to sign up')
             }

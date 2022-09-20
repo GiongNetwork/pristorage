@@ -38,6 +38,7 @@ import useFileCreate from '../hook/useFileCreate'
 import useDownloadFile from '../hook/useDownloadFile'
 import useFilePreview from '../hook/useFilePreview'
 import { async } from 'regenerator-runtime';
+import ColumnGroup from 'antd/lib/table/ColumnGroup';
 
 const { Dragger } = Upload;
 const {Option} = Select
@@ -91,12 +92,18 @@ export default function Home() {
                     _type: parseInt(values.type),
                     _password: cipher,
                 }
-                await window.contract.create_folder_v2(folder)
-                setIsModalCreateFolderVisible(false)
-                message.success("Folder created!!!")
-                setNewFolderId(folder._id)
-                setLoading(false)
-                formik.resetForm()
+                try {
+                    await window.contract.create_folder_v2(folder)
+                    setIsModalCreateFolderVisible(false)
+                    message.success("Folder created!!!")
+                    setNewFolderId(folder._id)
+                    formik.resetForm()              
+                } catch (error) {
+                    message.error(error.message, 10)
+                } finally {
+                    setLoading(false)
+                }
+                
 
                 // history.go(0)
             }
@@ -155,7 +162,7 @@ export default function Home() {
             const { status } = info.file;
             if (status !== 'uploading') {
                 setLoading(true)
-                fileSubmit(file, rootFolder, currentFolderId)
+                fileSubmit(file, rootFolder, currentFolderId, setIsModalUploadVisible)
             }
             // console.log(info.file.originFileObj)
             if (status === 'done') {
@@ -246,11 +253,17 @@ export default function Home() {
                                     type="File" 
                                     name={record.name} 
                                     handleDelete={async () => {
-                                        setTableLoading(true)
-                                        await window.contract.remove_file_v2({_folder: currentFolderId, _file: record.id})
-                                        setNewFolderId('')
-                                        setTableLoading(false)
-                                        message.success(`File ${record.name} deleted!!!`)
+                                        try {
+                                            setTableLoading(true)
+                                            await window.contract.remove_file_v2({_folder: currentFolderId, _file: record.id})
+                                            setNewFolderId('')
+                                            message.success(`File ${record.name} deleted!!!`)            
+                                        } catch (error) {
+                                            message.error(error.message, 10)
+                                        } finally {
+                                            setTableLoading(false)
+                                        }
+                                        
                                         // history.go(0)
                                     }}
                                 />
@@ -266,11 +279,18 @@ export default function Home() {
                                     type="Folder" 
                                     name={record.name} 
                                     handleDelete={async () => {
-                                        setTableLoading(true)
-                                        await window.contract.remove_folder_v2({_folder: record.id})
-                                        setNewFolderId('')
-                                        setTableLoading(false)
-                                        message.success(`Folder ${record.name} deleted!!!`)
+                                        try {
+                                            setTableLoading(true)
+                                            await window.contract.remove_folder_v2({_folder: record.id})
+                                            setNewFolderId('')
+                                            message.success(`Folder ${record.name} deleted!!!`) 
+                                        } catch (error) {
+                                            message.error(error.message, 10)
+                                        } finally {
+                                            setTableLoading(false)
+                                        }
+
+                                        
                                         // history.go(0)
                                     }}
                                 />
@@ -283,8 +303,8 @@ export default function Home() {
         },
 
     ];
-    const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin>:"Click or drag file to this area to upload"
-
+    const fileUploading = loading ? <Spin tip='File Uploading' spinning={loading}></Spin> : "Click or drag file to this area to upload"
+console.log(loading)
     return (
         <>
         
@@ -343,6 +363,7 @@ export default function Home() {
                             </Button>
                         </Tooltip>
                         <Modal 
+                            id="UploadFile"
                             title="Upload file" 
                             visible={isModalUploadVisible} 
                             onCancel={handleCancelUpload}
@@ -350,6 +371,7 @@ export default function Home() {
                             // okText="Upload"
                             // onOk={handleUploadFile}
                             // confirmLoading={loading}
+                            
                             maskClosable={false}
                         >
                             <Dragger {...props} disabled={upLoadDisable} beforeUpload={(inf)=> {

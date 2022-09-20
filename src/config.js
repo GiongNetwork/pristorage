@@ -1,4 +1,4 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME || 'vi-storage.merchi.testnet'
+const CONTRACT_NAME = process.env.CONTRACT_NAME || '219c68358efca00092a24d84d9de614a277eb3dae7da7e70cf4f37208a0fa41f'
 
 function getConfig(env) {
   switch (env) {
