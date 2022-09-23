@@ -14,6 +14,8 @@ import { v4 as uuidv4 } from 'uuid';
 import {wrap} from 'comlink'
 import {message} from 'antd'
 
+const worker = new Worker(new URL('../worker.js', import.meta.url), { type: "module" } )
+
 const useDownloadFile = () => {
 
     const [loading, setLoading] = useState(false)
@@ -31,7 +33,6 @@ const useDownloadFile = () => {
             message.info('Downloading')
             const files = await retrieveFiles(userCurrent.web3token, cid)
             message.info('Decrypting')
-            const worker = new Worker('../worker.js')
             const {decryptByWorker} = wrap(worker)
             const decryptedFile = await decryptByWorker(files, name, plaintext)
             concatenateBlobs(decryptedFile, fileType, (blob) => {

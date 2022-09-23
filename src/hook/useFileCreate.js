@@ -12,6 +12,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import {wrap} from 'comlink'
 import {message} from 'antd'
+const worker = new Worker(new URL('../worker.js', import.meta.url), { type: "module" } )
 
 const useFileCreate = () => {
     const [loading, setLoading] = useState(false)
@@ -55,7 +56,6 @@ const useFileCreate = () => {
 
     const fileSubmit = async (file, root, currentFolderId, setIsModalUploadVisible, setLoading) => {
         setLoading(true)
-        const worker = new Worker('../worker.js')
         const {encryptByWorker} = wrap(worker)
         const {folder_type: folderType = 1,folder_password: folderPassword} = root || {}
         if (folderType === 2) {

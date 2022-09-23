@@ -15,6 +15,8 @@ import {
 import {wrap} from 'comlink'
 import {message} from 'antd'
 
+const worker = new Worker(new URL('../worker.js', import.meta.url), { type: "module" } )
+
 
 const useFilePreview = () => {
 
@@ -29,7 +31,6 @@ const useFilePreview = () => {
         const {plaintext, success} = await decryptStringTypeData(userCurrent.privateKey, encryptedPassword)
         if (success) {
             const files = await retrieveFiles(userCurrent.web3token, cid)
-            const worker = new Worker('../worker.js')
             const {decryptByWorker} = wrap(worker)
             const decryptedFile = await decryptByWorker(files, name, plaintext)
             concatenateBlobs(decryptedFile, fileType, (blob) => {

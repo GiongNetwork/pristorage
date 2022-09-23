@@ -135,7 +135,7 @@ export default function SharedWithMe() {
             const { status } = info.file;
             if (status !== 'uploading') {
                 setLoading(true)
-                fileSubmit(file, rootFolder, currentFolderId, setIsModalUploadVisible)
+                fileSubmit(file, rootFolder, currentFolderId, setIsModalUploadVisible, setLoading)
             }
         },
         onDrop(e) {

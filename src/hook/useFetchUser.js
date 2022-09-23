@@ -15,7 +15,11 @@ const useFetchUser = () => {
 
     const fetchUserInfo = async () => {
         const account = await window.walletConnection.account()
+
+        // if (!account) return setLoggedIn(false)
         const {accountId} = account
+        if (!accountId) return setLoggedIn(false)
+
         const user = await window.contract.get_user({account_id: accountId})
         const privateKey = window.localStorage.getItem(`${accountId}_private_key`)
         if (!user) {
