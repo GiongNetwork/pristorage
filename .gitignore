@@ -31,6 +31,9 @@ yarn-debug.log*
 yarn-error.log*
 /dist/src.*
 /dist/worker.*
+/dist/favicon.*
+/dist/index.*
 /dist/*.html
 /out
 /contract/target/*
+/.parcel-cache
