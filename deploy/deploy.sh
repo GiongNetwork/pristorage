@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEPLOY_SERVER=$DEPLOY_SERVER
-SERVER_FOLDER="pristorage.mymerchize.com"
+SERVER_FOLDER="pristorage.io"
 
 # Building React output
 yarn install
