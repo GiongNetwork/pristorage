@@ -1,13 +1,12 @@
 #!/bin/bash
 
 DEPLOY_SERVER=$DEPLOY_SERVER
-SERVER_FOLDER="pristorage.mymerchize.com"
 
 # Building React output
 yarn install
-yarn run build
+yarn build:web
 
 echo "Deploying to ${DEPLOY_SERVER}"
-scp -r build/ ubuntu@${DEPLOY_SERVER}:/var/www/${SERVER_FOLDER}/html/
+#sudo cp -R dist/* /var/www/pristorage.mymerchize.com/html/
 
 echo "Finished copying the build files"
