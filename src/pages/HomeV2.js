@@ -53,6 +53,7 @@ export default function Home() {
     const [upLoadDisable, setUpLoadDisable] = useState(false)
     const [newFolderId, setNewFolderId] = useState('')
     const [file, setFile] = useState({})
+    const [downloadId, setDownloadId] = useState('')
     const history = useHistory()
     const {
         loading: folderLoading, 
@@ -182,9 +183,9 @@ export default function Home() {
         const {folder_type: folderType, folder_password} = rootFolder
         const {cid, encrypted_password, name, file_type} = record
         if (folderType === 1) {
-            download(cid, encrypted_password, name, file_type)
+            download(cid, encrypted_password, name, file_type, setDownloadId)
         } else if (folderType === 2) {
-            download(cid, folder_password, name, file_type)
+            download(cid, folder_password, name, file_type, setDownloadId)
         } else {
             message.error('download error, invalid file')
         }
@@ -232,8 +233,13 @@ export default function Home() {
                                 <Button
                                     onClick={async () => downloadFile(record)}
                                     className="mx-1"
+                                    loading={downloading && downloadId === record.cid}
+                                    disabled={downloading}
+                                    style={{minWidth:'46px'}}
                                 >
-                                    <DownloadOutlined />
+                                    {!(downloading && downloadId === record.cid)&&
+                                        <DownloadOutlined />
+                                    }
                                 </Button>
                             </Tooltip>
 
