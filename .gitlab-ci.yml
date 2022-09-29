@@ -18,4 +18,4 @@ deploy:
   script:
     - bash deploy/deploy.sh
   only:
-    - release
+    - master
