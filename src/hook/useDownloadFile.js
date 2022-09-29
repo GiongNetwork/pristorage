@@ -25,8 +25,9 @@ const useDownloadFile = () => {
     } = useSelector(state => state.folderV2)
     const {loading: loadingCurrent, current: userCurrent} = useSelector(state => state.user)
 
-    const download = async (cid, encryptedPassword, name, fileType) => {
+    const download = async (cid, encryptedPassword, name, fileType, setDownloadId) => {
         setLoading(true)
+        setDownloadId(cid)
 
         const {plaintext, success} = await decryptStringTypeData(userCurrent.privateKey, encryptedPassword)
         if (success) {
