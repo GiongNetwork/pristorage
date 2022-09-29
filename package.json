@@ -9,7 +9,7 @@
     "build:web": "parcel build src/index.html --no-scope-hoist --public-url ./",
     "dev:deploy:contract": "near dev-deploy",
     "deploy:contract": "near deploy",
-    "deploy:pages": "cp -R dist/* /var/www/pristorage.mymerchize.com/html/",
+    "deploy:pages": "cp -R dist/* /var/www/pristorage.io/html/",
     "deploy": "npm run build && npm run deploy:contract && npm run deploy:pages",
     "prestart": "npm run build:contract:debug",
     "start": "echo The app is starting! It will automatically open in your browser when ready && env-cmd -f .env parcel src/index.html --open",
